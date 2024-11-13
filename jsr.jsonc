@@ -6,7 +6,7 @@
 		".": "./mod.ts"
 	},
 	"imports": {
-		"https://raw.githubusercontent.com/hugoalh-studio/string-dissect-es/v3.0.1/mod.ts": "jsr:@hugoalh/string-dissect@3.0.1"
+		"https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.0/mod.ts": "jsr:@hugoalh/string-dissect@^4.0.0"
 	},
 	"publish": {
 		"exclude": [
@@ -22,8 +22,8 @@
 			"**/bench.tsx",
 			"**/test.ts",
 			"**/test.tsx",
-			".dnt.ts",
-			"npm/**"
+			"npm/**",
+			".dnt.ts"
 		],
 		"include": [
 			"**/*.json",

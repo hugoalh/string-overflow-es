@@ -1,45 +1,51 @@
-import { transform, type TransformOutput } from "DNT/transform";
-import { copy as fsCopy } from "STD/fs/copy";
-import { emptyDir } from "STD/fs/empty-dir";
-import { ensureDir } from "STD/fs/ensure-dir";
-import { walk as readDir, type WalkEntry } from "STD/fs/walk";
-import { dirname as pathDirname } from "node:path";
-const pathsMain: WalkEntry[] = await Array.fromAsync(readDir("."));
-const transformResult: TransformOutput = await transform({
-	entryPoints: ["mod.ts"],
+import {
+	getMetadataFromConfig,
+	invokeDenoNodeJSTransformer
+} from "DNT";
+const configJSR = await getMetadataFromConfig("jsr.jsonc");
+await invokeDenoNodeJSTransformer({
+	assetsCopy: [
+		"LICENSE.md",
+		"README.md"
+	],
+	entrypoints: configJSR.getExports(),
+	generateDeclarationMap: true,
 	mappings: {
-		"https://raw.githubusercontent.com/hugoalh-studio/string-dissect-es/v3.0.1/mod.ts": { name: "@hugoalh/string-dissect" }
+		"https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.0/mod.ts": {
+			name: "@hugoalh/string-dissect",
+			version: "^4.0.0"
+		}
 	},
-	shims: [],
-	target: "Latest"
+	metadata: {
+		name: configJSR.getName(),
+		version: configJSR.getVersion(),
+		description: "A module to truncate the string with the specify length; Safe with the emojis, URLs, and words.",
+		keywords: [
+			"overflow",
+			"string",
+			"truncate"
+		],
+		homepage: "https://github.com/hugoalh/string-overflow-es#readme",
+		bugs: {
+			url: "https://github.com/hugoalh/string-overflow-es/issues"
+		},
+		license: "MIT",
+		author: "hugoalh",
+		repository: {
+			type: "git",
+			url: "git+https://github.com/hugoalh/string-overflow-es.git"
+		},
+		scripts: {
+		},
+		engines: {
+			node: ">=20.9.0"
+		},
+		private: false,
+		publishConfig: {
+			access: "public"
+		}
+	},
+	outputDirectory: "npm",
+	outputDirectoryPreEmpty: true
 });
-const npmOutputDir = "npm";
-const npmOutputDirDist = `${npmOutputDir}/dist`;
-const npmOutputDirSource = `${npmOutputDir}/src`;
-await ensureDir(npmOutputDirDist);
-await ensureDir(npmOutputDirSource);
-await emptyDir(npmOutputDirDist);
-await emptyDir(npmOutputDirSource);
-for (const { filePath, fileText } of transformResult.main.files) {
-	const filePathOutput = `${npmOutputDirSource}/${filePath}`;
-	await ensureDir(pathDirname(filePathOutput));
-	await Deno.writeTextFile(filePathOutput, fileText);
-}
-for (const { path } of pathsMain) {
-	if (
-		/^LICENSE[^\\\/]*\.md$/.test(path) ||
-		/^README[^\\\/]*\.md$/.test(path)
-	) {
-		await fsCopy(path, `${npmOutputDir}/${path}`, {
-			overwrite: true,
-			preserveTimestamps: true
-		});
-	}
-}
-await new Deno.Command("pwsh", {
-	args: ["-NonInteractive", "-Command", "$ErrorActionPreference = 'Stop'; npm install; npm run build; npm publish --dry-run"],
-	cwd: `${Deno.cwd()}/${npmOutputDir}`,
-	stderr: "inherit",
-	stdin: "inherit",
-	stdout: "inherit"
-}).output();
+

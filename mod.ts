@@ -1,4 +1,8 @@
-import { StringDissector, type StringDissectorOptions, type StringSegmentDescriptor } from "https://raw.githubusercontent.com/hugoalh-studio/string-dissect-es/v3.0.1/mod.ts";
+import {
+	StringDissector,
+	type StringDissectorOptions,
+	type StringSegmentDescriptor
+} from "https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.0/mod.ts";
 /**
  * Enum of the string truncate ellipsis position.
  */
@@ -13,25 +17,24 @@ export enum StringTruncateEllipsisPosition {
 export interface StringTruncatorOptions extends StringDissectorOptions {
 	/**
 	 * Ellipsis mark of the target string.
-	 * @default "..."
+	 * @default {"..."}
 	 */
 	ellipsisMark?: string;
 	/**
 	 * Ellipsis position at the target string.
-	 * @default "end"
+	 * @default {"end"}
 	 */
 	ellipsisPosition?: StringTruncateEllipsisPosition | keyof typeof StringTruncateEllipsisPosition;
+	/**
+	 * Whether to remove string segments of ANSI escape codes.
+	 * @default {false}
+	 * @deprecated Migrate to {@linkcode StringDissectorOptions.outputANSI}.
+	 */
+	removeANSI?: boolean;
 }
-/**
- * Check length.
- * @access private
- * @param {number} maximumLength Maximum length of the target string.
- * @param {number} ellipsisMarkLength Ellipsis mark length of the target string.
- * @returns {void}
- */
 function checkLength(maximumLength: number, ellipsisMarkLength: number): void {
 	if (!(Number.isSafeInteger(maximumLength) && maximumLength >= 0)) {
-		throw new RangeError(`Argument \`maximumLength\` is not a number which is integer, positive, and safe!`);
+		throw new RangeError(`\`${maximumLength}\` (parameter \`maximumLength\`) is not a number which is integer, positive, and safe!`);
 	}
 	if (ellipsisMarkLength > maximumLength) {
 		throw new Error(`Ellipsis string is too long!`);
@@ -41,36 +44,36 @@ function checkLength(maximumLength: number, ellipsisMarkLength: number): void {
  * String truncator to truncate the string with the specify length; Safe with the emojis, URLs, and words.
  */
 export class StringTruncator {
-	#ellipsisMark = "...";
-	#ellipsisPosition: StringTruncateEllipsisPosition = StringTruncateEllipsisPosition.End;
+	#dissector: StringDissector;
+	#ellipsisMark: string;
+	#ellipsisPosition: `${StringTruncateEllipsisPosition}`;
 	#maximumLength: number;
 	#resultLengthMaximum: number;
-	#stringDissector: StringDissector;
 	/**
 	 * Initialize string truncator.
 	 * @param {number} maximumLength Maximum length of the target string.
 	 * @param {StringTruncatorOptions} [options={}] Options.
 	 */
 	constructor(maximumLength: number, options: StringTruncatorOptions = {}) {
-		if (typeof options.ellipsisMark !== "undefined") {
-			this.#ellipsisMark = options.ellipsisMark;
+		const {
+			ellipsisMark = "...",
+			ellipsisPosition = "end",
+			removeANSI,
+			...optionsDissector
+		} = options;
+		this.#dissector = new StringDissector({
+			...optionsDissector,
+			outputANSI: optionsDissector.outputANSI ?? ((typeof removeANSI === "boolean") ? !removeANSI : undefined)
+		});
+		this.#ellipsisMark = ellipsisMark;
+		const ellipsisPositionFmt: `${StringTruncateEllipsisPosition}` | undefined = StringTruncateEllipsisPosition[ellipsisPosition];
+		if (typeof ellipsisPositionFmt === "undefined") {
+			throw new RangeError(`\`${ellipsisPosition}\` (parameter \`options.ellipsisPosition\`) is not a valid ellipsis position! Only accept these values: ${Array.from(new Set<string>(Object.keys(StringTruncateEllipsisPosition)).values()).sort().join(", ")}`);
 		}
-		if (typeof options.ellipsisPosition !== "undefined") {
-			const value: StringTruncateEllipsisPosition | undefined = StringTruncateEllipsisPosition[options.ellipsisPosition];
-			if (typeof value === "undefined") {
-				throw new RangeError(`\`${options.ellipsisPosition}\` is not a valid ellipsis position! Only accept these values: ${Array.from<string>(new Set(Object.keys(StringTruncateEllipsisPosition).sort()).values()).join(", ")}`);
-			}
-			this.#ellipsisPosition = value;
-		}
+		this.#ellipsisPosition = ellipsisPositionFmt;
 		checkLength(maximumLength, this.#ellipsisMark.length);
 		this.#maximumLength = maximumLength;
 		this.#resultLengthMaximum = this.#maximumLength - this.#ellipsisMark.length;
-		this.#stringDissector = new StringDissector({
-			locales: options.locales,
-			removeANSI: options.removeANSI,
-			safeURLs: options.safeURLs,
-			safeWords: options.safeWords
-		});
 	}
 	/**
 	 * Truncate the string.
@@ -89,8 +92,8 @@ export class StringTruncator {
 		if (item.length <= maximumLength) {
 			return item;
 		}
-		let resultLengthEnd = 0;
-		let resultLengthStart = 0;
+		let resultLengthEnd: number = 0;
+		let resultLengthStart: number = 0;
 		switch (this.#ellipsisPosition) {
 			case "end":
 				resultLengthStart = resultLengthMaximum;
@@ -105,18 +108,18 @@ export class StringTruncator {
 				resultLengthEnd = resultLengthMaximum;
 				break;
 		}
-		const stringSegments: string[] = Array.from<StringSegmentDescriptor, string>(this.#stringDissector.dissect(item), (segment: StringSegmentDescriptor): string => {
-			return segment.value;
+		const stringSegments: string[] = Array.from(this.#dissector.dissect(item), ({ value }: StringSegmentDescriptor): string => {
+			return value;
 		});
-		let resultStringStart = "";
-		for (let index = 0; index < stringSegments.length; index += 1) {
+		let resultStringStart: string = "";
+		for (let index: number = 0; index < stringSegments.length; index += 1) {
 			const segment: string = stringSegments[index];
 			if (resultStringStart.length + segment.length > resultLengthStart) {
 				break;
 			}
 			resultStringStart = `${resultStringStart}${segment}`;
 		}
-		let resultStringEnd = "";
+		let resultStringEnd: string = "";
 		for (let index: number = stringSegments.length - 1; index >= 0; index -= 1) {
 			const segment: string = stringSegments[index];
 			if (resultStringEnd.length + segment.length > resultLengthEnd) {
@@ -124,17 +127,7 @@ export class StringTruncator {
 			}
 			resultStringEnd = `${segment}${resultStringEnd}`;
 		}
-		return `${resultStringStart}${this.#ellipsisMark}${resultStringEnd}`;
-	}
-	/**
-	 * Truncate the string with the specify length; Safe with the emojis, URLs, and words.
-	 * @param {string} item String that need to truncate.
-	 * @param {number} maximumLength Maximum length of the target string.
-	 * @param {StringTruncatorOptions} [options={}] Options.
-	 * @returns {string} A truncated string.
-	 */
-	static truncate(item: string, maximumLength: number, options: StringTruncatorOptions = {}): string {
-		return new this(maximumLength, options).truncate(item);
+		return `${resultStringStart.trimEnd()}${this.#ellipsisMark}${resultStringEnd.trimStart()}`;
 	}
 }
 export default StringTruncator;
