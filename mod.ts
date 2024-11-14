@@ -50,7 +50,7 @@ export class StringTruncator {
 	#maximumLength: number;
 	#resultLengthMaximum: number;
 	/**
-	 * Initialize string truncator.
+	 * Initialize the string truncator.
 	 * @param {number} maximumLength Maximum length of the target string.
 	 * @param {StringTruncatorOptions} [options={}] Options.
 	 */
