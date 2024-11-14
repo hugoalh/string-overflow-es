@@ -68,7 +68,7 @@ export class StringTruncator {
 		this.#ellipsisMark = ellipsisMark;
 		const ellipsisPositionFmt: `${StringTruncateEllipsisPosition}` | undefined = StringTruncateEllipsisPosition[ellipsisPosition];
 		if (typeof ellipsisPositionFmt === "undefined") {
-			throw new RangeError(`\`${ellipsisPosition}\` (parameter \`options.ellipsisPosition\`) is not a valid ellipsis position! Only accept these values: ${Array.from(new Set<string>(Object.keys(StringTruncateEllipsisPosition)).values()).sort().join(", ")}`);
+			throw new RangeError(`\`${ellipsisPosition}\` is not a valid ellipsis position! Only accept these values: ${Array.from(new Set<string>(Object.keys(StringTruncateEllipsisPosition)).values()).sort().join(", ")}`);
 		}
 		this.#ellipsisPosition = ellipsisPositionFmt;
 		checkLength(maximumLength, this.#ellipsisMark.length);
