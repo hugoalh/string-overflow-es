@@ -2,18 +2,19 @@ import {
 	StringDissector,
 	type StringDissectorOptions,
 	type StringSegmentDescriptor
-} from "https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.0/mod.ts";
-/**
- * Enum of the string truncate ellipsis position.
- */
-export enum StringTruncateEllipsisPosition {
-	end = "end",
-	End = "end",
-	middle = "middle",
-	Middle = "middle",
-	start = "start",
-	Start = "start"
-}
+} from "https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.1/mod.ts";
+export type StringTruncateEllipsisPosition =
+	| "end"
+	| "middle"
+	| "start";
+const ellipsisPositions: Readonly<Record<string, StringTruncateEllipsisPosition>> = {
+	end: "end",
+	End: "end",
+	middle: "middle",
+	Middle: "middle",
+	start: "start",
+	Start: "start"
+};
 export interface StringTruncatorOptions extends StringDissectorOptions {
 	/**
 	 * Ellipsis mark of the target string.
@@ -24,13 +25,7 @@ export interface StringTruncatorOptions extends StringDissectorOptions {
 	 * Ellipsis position at the target string.
 	 * @default {"end"}
 	 */
-	ellipsisPosition?: StringTruncateEllipsisPosition | keyof typeof StringTruncateEllipsisPosition;
-	/**
-	 * Whether to remove string segments of ANSI escape codes.
-	 * @default {false}
-	 * @deprecated Migrate to {@linkcode StringDissectorOptions.outputANSI}.
-	 */
-	removeANSI?: boolean;
+	ellipsisPosition?: StringTruncateEllipsisPosition;
 }
 function checkLength(maximumLength: number, ellipsisMarkLength: number): void {
 	if (!(Number.isSafeInteger(maximumLength) && maximumLength >= 0)) {
@@ -46,7 +41,7 @@ function checkLength(maximumLength: number, ellipsisMarkLength: number): void {
 export class StringTruncator {
 	#dissector: StringDissector;
 	#ellipsisMark: string;
-	#ellipsisPosition: `${StringTruncateEllipsisPosition}`;
+	#ellipsisPosition: StringTruncateEllipsisPosition;
 	#maximumLength: number;
 	#resultLengthMaximum: number;
 	/**
@@ -58,17 +53,13 @@ export class StringTruncator {
 		const {
 			ellipsisMark = "...",
 			ellipsisPosition = "end",
-			removeANSI,
 			...optionsDissector
 		} = options;
-		this.#dissector = new StringDissector({
-			...optionsDissector,
-			outputANSI: optionsDissector.outputANSI ?? ((typeof removeANSI === "boolean") ? !removeANSI : undefined)
-		});
+		this.#dissector = new StringDissector(optionsDissector);
 		this.#ellipsisMark = ellipsisMark;
-		const ellipsisPositionFmt: `${StringTruncateEllipsisPosition}` | undefined = StringTruncateEllipsisPosition[ellipsisPosition];
-		if (typeof ellipsisPositionFmt === "undefined") {
-			throw new RangeError(`\`${ellipsisPosition}\` is not a valid ellipsis position! Only accept these values: ${Array.from(new Set<string>(Object.keys(StringTruncateEllipsisPosition)).values()).sort().join(", ")}`);
+		const ellipsisPositionFmt: StringTruncateEllipsisPosition | undefined = ellipsisPositions[ellipsisPosition];
+		if (!Object.values(ellipsisPositions).includes(ellipsisPositionFmt)) {
+			throw new RangeError(`\`${ellipsisPosition}\` is not a valid ellipsis position! Only accept these values: ${Object.keys(ellipsisPositions).sort().join(", ")}`);
 		}
 		this.#ellipsisPosition = ellipsisPositionFmt;
 		checkLength(maximumLength, this.#ellipsisMark.length);

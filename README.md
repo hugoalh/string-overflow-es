@@ -48,35 +48,28 @@ An ES (JavaScript & TypeScript) module to truncate the string with the specify l
 > - For usage of JSR or NPM resources, it is recommended to import the entire module with the main entrypoint, however it is also able to import part of the module with sub entrypoint if available, please visit the [file `jsr.jsonc`](./jsr.jsonc) property `exports` for available sub entrypoints.
 > - It is recommended to use this module with tag for immutability.
 
-### 🛡️ Require Runtime Permissions
+### 🛡️ Runtime Permissions
 
-*This module does not require any runtime permission.*
+*This module does not request any runtime permission.*
 
-## 🧩 APIs (Excerpt)
+## 🧩 APIs
 
 - ```ts
   class StringTruncator {
-    constructor(maximumLength: number, options: StringTruncatorOptions = {});
+    constructor(maximumLength: number, options?: StringTruncatorOptions);
     truncate(item: string, maximumLengthOverride?: number): string;
   }
   ```
 - ```ts
-  enum StringTruncateEllipsisPosition {
-    end = "end",
-    End = "end",
-    middle = "middle",
-    Middle = "middle",
-    start = "start",
-    Start = "start"
-  }
-  ```
-- ```ts
-  function truncateString(item: string, maximumLength: number, options: StringTruncatorOptions = {}): string;
+  type StringTruncateEllipsisPosition = 
+    | "end"
+    | "middle"
+    | "start";
   ```
 - ```ts
   interface StringTruncatorOptions extends StringDissectorOptions {
     ellipsisMark?: string;
-    ellipsisPosition?: StringTruncateEllipsisPosition | keyof typeof StringTruncateEllipsisPosition;
+    ellipsisPosition?: StringTruncateEllipsisPosition;
   }
   ```
 
@@ -90,13 +83,9 @@ An ES (JavaScript & TypeScript) module to truncate the string with the specify l
 - ```ts
   const text = "Vel ex sit est sit est tempor enim et voluptua consetetur gubergren gubergren ut. Amet dolores sit. Duo iriure vel dolore illum diam. Ea vero diam diam tincidunt molestie elitr te sed nisl ut vulputate tincidunt accusam sit sed. Amet sea dolore rebum amet accusam labore dolor no sadipscing labore. Sit erat sit sed voluptua tempor sit ea dolor et.";
 
-  /* Either */
   new StringTruncator(100).truncate(text);
-  truncateString(text, 100);
   //=> "Vel ex sit est sit est tempor enim et voluptua consetetur gubergren gubergren ut. Amet dolores..."
 
-  /* Either */
   new StringTruncator(100, { safeWords: false }).truncate(text);
-  truncateString(text, 100, { safeWords: false });
   //=> "Vel ex sit est sit est tempor enim et voluptua consetetur gubergren gubergren ut. Amet dolores si..."
   ```

@@ -11,9 +11,9 @@ await invokeDenoNodeJSTransformer({
 	entrypoints: configJSR.getExports(),
 	generateDeclarationMap: true,
 	mappings: {
-		"https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.0/mod.ts": {
+		"https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.1/mod.ts": {
 			name: "@hugoalh/string-dissect",
-			version: "^4.0.0"
+			version: "^4.0.1"
 		}
 	},
 	metadata: {
