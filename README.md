@@ -6,7 +6,7 @@
 [![JSR: @hugoalh/string-overflow](https://img.shields.io/jsr/v/@hugoalh/string-overflow?label=@hugoalh/string-overflow&labelColor=F7DF1E&logo=jsr&logoColor=000000&style=flat "JSR: @hugoalh/string-overflow")](https://jsr.io/@hugoalh/string-overflow)
 [![NPM: @hugoalh/string-overflow](https://img.shields.io/npm/v/@hugoalh/string-overflow?label=@hugoalh/string-overflow&labelColor=CB3837&logo=npm&logoColor=ffffff&style=flat "NPM: @hugoalh/string-overflow")](https://www.npmjs.com/package/@hugoalh/string-overflow)
 
-An ES (JavaScript & TypeScript) module to truncate the string with the specify length; Safe with the emojis, URLs, and words.
+An ECMAScript (JavaScript & TypeScript) module to truncate the string with the specify length; Safe with the emojis, URLs, and words.
 
 ## 🔰 Begin
 
