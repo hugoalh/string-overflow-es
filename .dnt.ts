@@ -12,9 +12,9 @@ await invokeDenoNodeJSTransformer({
 	fixInjectedImports: true,
 	generateDeclarationMap: true,
 	mappings: {
-		"https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.1/mod.ts": {
+		"https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.2/mod.ts": {
 			name: "@hugoalh/string-dissect",
-			version: "^4.0.1"
+			version: "^4.0.2"
 		}
 	},
 	metadata: {

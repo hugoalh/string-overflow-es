@@ -2,7 +2,7 @@ import {
 	StringDissector,
 	type StringDissectorOptions,
 	type StringSegmentDescriptor
-} from "https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.1/mod.ts";
+} from "https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.2/mod.ts";
 export type StringTruncateEllipsisPosition =
 	| "end"
 	| "middle"
@@ -35,6 +35,11 @@ function checkLength(maximumLength: number, ellipsisMarkLength: number): void {
 		throw new Error(`Ellipsis string is too long!`);
 	}
 }
+interface StringTruncatorLengths {
+	left: number;
+	right: number;
+	total: number;
+}
 /**
  * String truncator to truncate the string with the specify length; Safe with the emojis, URLs, and words.
  */
@@ -43,19 +48,17 @@ export class StringTruncator {
 	#ellipsisMark: string;
 	#ellipsisPosition: StringTruncateEllipsisPosition;
 	#maximumLength: number;
-	#resultLengthMaximum: number;
 	/**
-	 * Initialize the string truncator.
+	 * Initialize.
 	 * @param {number} maximumLength Maximum length of the target string.
 	 * @param {StringTruncatorOptions} [options={}] Options.
 	 */
 	constructor(maximumLength: number, options: StringTruncatorOptions = {}) {
 		const {
 			ellipsisMark = "...",
-			ellipsisPosition = "end",
-			...optionsDissector
-		} = options;
-		this.#dissector = new StringDissector(optionsDissector);
+			ellipsisPosition = "end"
+		}: StringTruncatorOptions = options;
+		this.#dissector = new StringDissector(options);
 		this.#ellipsisMark = ellipsisMark;
 		const ellipsisPositionFmt: StringTruncateEllipsisPosition | undefined = ellipsisPositions[ellipsisPosition];
 		if (!Object.values(ellipsisPositions).includes(ellipsisPositionFmt)) {
@@ -64,7 +67,35 @@ export class StringTruncator {
 		this.#ellipsisPosition = ellipsisPositionFmt;
 		checkLength(maximumLength, this.#ellipsisMark.length);
 		this.#maximumLength = maximumLength;
-		this.#resultLengthMaximum = this.#maximumLength - this.#ellipsisMark.length;
+	}
+	#resolveMaximumLength(maximumLengthOverride?: number): StringTruncatorLengths {
+		if (typeof maximumLengthOverride !== "undefined") {
+			checkLength(maximumLengthOverride, this.#ellipsisMark.length);
+		}
+		const total: number = maximumLengthOverride ?? this.#maximumLength;
+		const result: number = total - this.#ellipsisMark.length;
+		switch (this.#ellipsisPosition) {
+			case "end":
+				return {
+					left: result,
+					right: 0,
+					total
+				};
+			case "middle": {
+				const resultHalf: number = Math.floor(result / 2);
+				return {
+					left: resultHalf,
+					right: resultHalf,
+					total
+				};
+			}
+			case "start":
+				return {
+					left: 0,
+					right: result,
+					total
+				};
+		}
 	}
 	/**
 	 * Truncate the string.
@@ -73,52 +104,30 @@ export class StringTruncator {
 	 * @returns {string} A truncated string.
 	 */
 	truncate(item: string, maximumLengthOverride?: number): string {
-		let maximumLength: number = this.#maximumLength;
-		let resultLengthMaximum: number = this.#resultLengthMaximum;
-		if (typeof maximumLengthOverride !== "undefined") {
-			checkLength(maximumLengthOverride, this.#ellipsisMark.length);
-			maximumLength = maximumLengthOverride;
-			resultLengthMaximum = maximumLengthOverride - this.#ellipsisMark.length;
-		}
-		if (item.length <= maximumLength) {
+		const lengths: StringTruncatorLengths = this.#resolveMaximumLength(maximumLengthOverride);
+		if (item.length <= lengths.total) {
 			return item;
 		}
-		let resultLengthEnd: number = 0;
-		let resultLengthStart: number = 0;
-		switch (this.#ellipsisPosition) {
-			case "end":
-				resultLengthStart = resultLengthMaximum;
-				break;
-			case "middle": {
-				const resultLengthHalf: number = Math.floor(resultLengthMaximum / 2);
-				resultLengthStart = resultLengthHalf;
-				resultLengthEnd = resultLengthHalf;
-			}
-				break;
-			case "start":
-				resultLengthEnd = resultLengthMaximum;
-				break;
-		}
-		const stringSegments: string[] = Array.from(this.#dissector.dissect(item), ({ value }: StringSegmentDescriptor): string => {
+		const segments: readonly string[] = Array.from(this.#dissector.dissect(item), ({ value }: StringSegmentDescriptor): string => {
 			return value;
 		});
-		let resultStringStart: string = "";
-		for (let index: number = 0; index < stringSegments.length; index += 1) {
-			const segment: string = stringSegments[index];
-			if (resultStringStart.length + segment.length > resultLengthStart) {
+		let resultLeft: string = "";
+		for (let index: number = 0; index < segments.length; index += 1) {
+			const segment: string = segments[index];
+			if (resultLeft.length + segment.length > lengths.left) {
 				break;
 			}
-			resultStringStart = `${resultStringStart}${segment}`;
+			resultLeft = `${resultLeft}${segment}`;
 		}
-		let resultStringEnd: string = "";
-		for (let index: number = stringSegments.length - 1; index >= 0; index -= 1) {
-			const segment: string = stringSegments[index];
-			if (resultStringEnd.length + segment.length > resultLengthEnd) {
+		let resultRight: string = "";
+		for (let index: number = segments.length - 1; index >= 0; index -= 1) {
+			const segment: string = segments[index];
+			if (resultRight.length + segment.length > lengths.right) {
 				break;
 			}
-			resultStringEnd = `${segment}${resultStringEnd}`;
+			resultRight = `${segment}${resultRight}`;
 		}
-		return `${resultStringStart.trimEnd()}${this.#ellipsisMark}${resultStringEnd.trimStart()}`;
+		return `${resultLeft.trimEnd()}${this.#ellipsisMark}${resultRight.trimStart()}`;
 	}
 }
 export default StringTruncator;
