@@ -4,8 +4,8 @@
 
 🔗
 [GitHub](https://github.com/hugoalh/string-overflow-es)
-[JSR](https://jsr.io/@hugoalh/string-overflow)
-[NPM](https://www.npmjs.com/package/@hugoalh/string-overflow)
+● [JSR](https://jsr.io/@hugoalh/string-overflow)
+● [NPM](https://www.npmjs.com/package/@hugoalh/string-overflow)
 
 An ECMAScript module to truncate the string with the specify length; Safe with the emojis, URLs, and words.
 
