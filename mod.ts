@@ -2,19 +2,16 @@ import {
 	StringDissector,
 	type StringDissectorOptions,
 	type StringSegmentDescriptor
-} from "https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.2/mod.ts";
+} from "https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.3/mod.ts";
 export type StringTruncateEllipsisPosition =
 	| "end"
 	| "middle"
 	| "start";
-const ellipsisPositions: Readonly<Record<string, StringTruncateEllipsisPosition>> = {
-	end: "end",
-	End: "end",
-	middle: "middle",
-	Middle: "middle",
-	start: "start",
-	Start: "start"
-};
+const ellipsisPositions: readonly StringTruncateEllipsisPosition[] = [/* UNIQUE */
+	"end",
+	"middle",
+	"start"
+];
 export interface StringTruncatorOptions extends StringDissectorOptions {
 	/**
 	 * Ellipsis mark of the target string.
@@ -47,32 +44,31 @@ export class StringTruncator {
 	#dissector: StringDissector;
 	#ellipsisMark: string;
 	#ellipsisPosition: StringTruncateEllipsisPosition;
-	#maximumLength: number;
+	#maximumLengthDefault: number;
 	/**
 	 * Initialize.
-	 * @param {number} maximumLength Maximum length of the target string.
+	 * @param {number} maximumLengthDefault Default maximum length of the target string.
 	 * @param {StringTruncatorOptions} [options={}] Options.
 	 */
-	constructor(maximumLength: number, options: StringTruncatorOptions = {}) {
+	constructor(maximumLengthDefault: number, options: StringTruncatorOptions = {}) {
 		const {
 			ellipsisMark = "...",
 			ellipsisPosition = "end"
 		}: StringTruncatorOptions = options;
 		this.#dissector = new StringDissector(options);
 		this.#ellipsisMark = ellipsisMark;
-		const ellipsisPositionFmt: StringTruncateEllipsisPosition | undefined = ellipsisPositions[ellipsisPosition];
-		if (!Object.values(ellipsisPositions).includes(ellipsisPositionFmt)) {
-			throw new RangeError(`\`${ellipsisPosition}\` is not a valid ellipsis position! Only accept these values: ${Object.keys(ellipsisPositions).sort().join(", ")}`);
+		if (!ellipsisPositions.includes(ellipsisPosition)) {
+			throw new RangeError(`\`${ellipsisPosition}\` is not a valid ellipsis position! Only accept these values: ${Object.keys(ellipsisPositions).sort().join(", ")}.`);
 		}
-		this.#ellipsisPosition = ellipsisPositionFmt;
-		checkLength(maximumLength, this.#ellipsisMark.length);
-		this.#maximumLength = maximumLength;
+		this.#ellipsisPosition = ellipsisPosition;
+		checkLength(maximumLengthDefault, this.#ellipsisMark.length);
+		this.#maximumLengthDefault = maximumLengthDefault;
 	}
 	#resolveMaximumLength(maximumLengthOverride?: number): StringTruncatorLengths {
 		if (typeof maximumLengthOverride !== "undefined") {
 			checkLength(maximumLengthOverride, this.#ellipsisMark.length);
 		}
-		const total: number = maximumLengthOverride ?? this.#maximumLength;
+		const total: number = maximumLengthOverride ?? this.#maximumLengthDefault;
 		const result: number = total - this.#ellipsisMark.length;
 		switch (this.#ellipsisPosition) {
 			case "end":
@@ -100,7 +96,7 @@ export class StringTruncator {
 	/**
 	 * Truncate the string.
 	 * @param {string} item String that need to truncate.
-	 * @param {number} [maximumLengthOverride] Override the defined maximum length of the target string.
+	 * @param {number} [maximumLengthOverride] Override the default maximum length of the target string.
 	 * @returns {string} A truncated string.
 	 */
 	truncate(item: string, maximumLengthOverride?: number): string {

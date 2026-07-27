@@ -3,7 +3,8 @@
 [**⚖️** MIT](./LICENSE.md)
 
 🔗
-[GitHub](https://github.com/hugoalh/string-overflow-es)
+[DistBoard @hugoalh](https://hugoalh.github.io/distboard/string_overflow_ecmascript)
+● [GitHub](https://github.com/hugoalh/string-overflow-es)
 ● [JSR](https://jsr.io/@hugoalh/string-overflow)
 ● [NPM](https://www.npmjs.com/package/@hugoalh/string-overflow)
 
@@ -52,7 +53,7 @@ This does not request any runtime permission.
 
 - ```ts
   class StringTruncator {
-    constructor(maximumLength: number, options?: StringTruncatorOptions);
+    constructor(maximumLengthDefault: number, options?: StringTruncatorOptions);
     truncate(item: string, maximumLengthOverride?: number): string;
   }
   ```

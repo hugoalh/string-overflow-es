@@ -1,13 +1,13 @@
 {
 	"$schema": "https://raw.githubusercontent.com/denoland/deno/main/cli/schemas/config-file.v1.json",
 	"name": "@hugoalh/string-overflow",
-	"version": "2.1.1",
+	"version": "2.1.2",
 	"license": "MIT",
 	"exports": {
 		".": "./mod.ts"
 	},
 	"imports": {
-		"https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.2/mod.ts": "jsr:@hugoalh/string-dissect@^4.0.2"
+		"https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.3/mod.ts": "jsr:@hugoalh/string-dissect@^4.0.3"
 	},
 	"publish": {
 		"exclude": [
