@@ -2,7 +2,7 @@ import {
 	StringDissector,
 	type StringDissectorOptions,
 	type StringSegmentDescriptor
-} from "https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.3/mod.ts";
+} from "jsr:@hugoalh/string-dissect@^4.0.3";
 export type StringTruncateEllipsisPosition =
 	| "end"
 	| "middle"

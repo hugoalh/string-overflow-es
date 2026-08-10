@@ -12,7 +12,7 @@ await transform({
 	entrypointsScript: manifest.exports,
 	generateDeclarationMap: true,
 	mappings: {
-		"https://raw.githubusercontent.com/hugoalh/string-dissect-es/v4.0.3/mod.ts": {
+		"jsr:@hugoalh/string-dissect@^4.0.3": {
 			name: "@hugoalh/string-dissect",
 			version: "^4.0.3"
 		}
