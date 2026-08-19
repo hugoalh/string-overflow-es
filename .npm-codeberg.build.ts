@@ -44,6 +44,16 @@ await transform({
 		}
 	},
 	outputDirectory: "dist/npm-codeberg",
-	outputDirectoryPreEmpty: true
+	outputDirectoryPreEmpty: true,
+	shims: {
+		blob: false,
+		crypto: false,
+		deno: false,
+		prompts: false,
+		timers: false,
+		undici: false,
+		weakRef: false,
+		webSocket: false
+	}
 });
 
