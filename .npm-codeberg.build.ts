@@ -10,7 +10,6 @@ await transform({
 	],
 	//@ts-ignore Lazy type.
 	entrypointsScript: manifest.exports,
-	generateDeclarationMap: true,
 	mappings: {
 		"jsr:@hugoalh/string-dissect@^4.0.3": {
 			name: "@hugoalh/string-dissect",
